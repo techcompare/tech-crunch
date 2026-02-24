@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildTogether — Learn. Build. Ship.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --border: #1a2030;
+    --accent: #00f5a0;
+    --accent2: #00c8ff;
+    --accent3: #ff6b35;
+    --text: #e8edf5;
+    --muted: #5a6880;
+    --card: #0f151e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease, opacity 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(0,245,160,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.25s ease, width 0.2s, height 0.2s;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,160,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(8,11,16,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: #000;
+    padding: 10px 22px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    border: none;
+    cursor: none;
+    letter-spacing: 0.03em;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+  }
+  .nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,245,160,0.3);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid rgba(0,245,160,0.3);
+    background: rgba(0,245,160,0.05);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    animation: fadeUp 0.8s 0.1s ease both;
+    max-width: 900px;
+  }
+
+  .hero h1 .line-accent { color: var(--accent); }
+  .hero h1 .line-blue { color: var(--accent2); }
+
+  .hero-sub {
+    margin-top: 28px;
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 48px;
+    animation: fadeUp 0.8s 0.3s ease both;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    padding: 16px 36px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: none;
+    cursor: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,245,160,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 16px 36px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    cursor: none;
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 72px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.8s 0.4s ease both;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    display: block;
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+  }
+  .orb1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,245,160,0.08) 0%, transparent 70%);
+    top: -100px; left: -200px;
+  }
+  .orb2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,200,255,0.07) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* PILLARS SECTION */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 64px;
+    max-width: 600px;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+  }
+
+  .pillar-card {
+    background: var(--card);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .pillar-card:hover { background: #111820; }
+  .pillar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.4s ease;
+  }
+  .pillar-card:nth-child(2)::before { background: var(--accent2); }
+  .pillar-card:hover::before { height: 100%; }
+
+  .pillar-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .pillar-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .pillar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .pillar-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* WHO IS THIS FOR */
+  .audience-section {
+    padding: 100px 48px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .audience-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .audience-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border);
+    margin-top: 64px;
+  }
+
+  .audience-card {
+    background: var(--card);
+    padding: 36px 28px;
+    text-align: center;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .audience-card:hover { background: #111820; }
+
+  .audience-emoji {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 16px;
+  }
+  .audience-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .audience-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .audience-card:nth-child(1):hover .audience-emoji { transform: scale(1.2); transition: transform 0.3s; }
+  .audience-card:nth-child(2):hover .audience-emoji { transform: scale(1.2); transition: transform 0.3s; }
+  .audience-card:nth-child(3):hover .audience-emoji { transform: scale(1.2); transition: transform 0.3s; }
+  .audience-card:nth-child(4):hover .audience-emoji { transform: scale(1.2); transition: transform 0.3s; }
+
+  /* RITUALS */
+  .rituals-section {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .rituals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--border);
+    margin-top: 64px;
+  }
+
+  .ritual-item {
+    background: var(--card);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    transition: background 0.3s, padding-left 0.3s;
+    cursor: none;
+  }
+  .ritual-item:hover {
+    background: #111820;
+    padding-left: 52px;
+  }
+
+  .ritual-day {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    min-width: 80px;
+  }
+  .ritual-line {
+    width: 1px; height: 32px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .ritual-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    min-width: 200px;
+  }
+  .ritual-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    flex: 1;
+  }
+  .ritual-tag {
+    padding: 4px 12px;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* HASHTAGS */
+  .hashtags-section {
+    padding: 80px 48px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .hashtags-inner { max-width: 800px; margin: 0 auto; }
+
+  .hashtags-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .hashtag-pills {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hashtag-pill {
+    padding: 12px 24px;
+    border: 1px solid var(--border);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    cursor: none;
+  }
+  .hashtag-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,245,160,0.05);
+  }
+  .hashtag-pill.main {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,245,160,0.07);
+  }
+
+  /* CTA SECTION */
+  .cta-section {
+    position: relative;
+    padding: 120px 48px;
+    text-align: center;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(0,245,160,0.06) 0%, transparent 70%);
+  }
+
+  .cta-inner { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
+
+  .cta-mono {
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .cta-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 48px;
+    line-height: 1.7;
+  }
+
+  .cta-x-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--text);
+    color: #000;
+    padding: 18px 40px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: none;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  }
+  .cta-x-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(0,245,160,0.3);
+  }
+
+  .x-icon {
+    font-weight: 900;
+    font-size: 1.1rem;
+    font-style: normal;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1;
+    position: relative;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .footer-logo span { color: var(--accent); }
+
+  .footer-text {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .section { padding: 60px 24px; }
+    .pillars-grid { grid-template-columns: 1fr; }
+    .audience-grid { grid-template-columns: 1fr 1fr; }
+    .audience-section { padding: 60px 24px; }
+    .rituals-section { padding: 60px 24px; }
+    .ritual-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .ritual-line { display: none; }
+    .hashtags-section { padding: 60px 24px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; padding: 32px 24px; }
+    .hero-stats { gap: 28px; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Build<span>Together</span></a>
+  <ul class="nav-links">
+    <li><a href="#pillars">How It Works</a></li>
+    <li><a href="#who">Who It's For</a></li>
+    <li><a href="#rituals">Rituals</a></li>
+  </ul>
+  <a href="https://x.com" class="nav-cta" target="_blank">Join on X →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Now Building in Public · X Community
+  </div>
+
+  <h1>
+    Learn.<br>
+    <span class="line-accent">Build.</span><br>
+    <span class="line-blue">Ship.</span>
+  </h1>
+
+  <p class="hero-sub">
+    A community for developers, makers, and creators who share their daily journey, post tech insights, and grow together — one tweet at a time.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://x.com" class="btn-primary" target="_blank">
+      Join the Community →
+    </a>
+    <a href="#pillars" class="btn-secondary">See How It Works</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">2<span>+</span></span>
+      <span class="stat-label">Content Pillars</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">4<span>+</span></span>
+      <span class="stat-label">Audience Types</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Things To Build</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">1</span>
+      <span class="stat-label">Community</span>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section id="pillars">
+  <div class="section">
+    <div class="section-label reveal">Two Pillars</div>
+    <h2 class="section-title reveal">Everything you need to grow as a builder.</h2>
+
+    <div class="pillars-grid reveal">
+      <div class="pillar-card">
+        <div class="pillar-num">01</div>
+        <span class="pillar-icon">📓</span>
+        <div class="pillar-title">Daily Journey</div>
+        <p class="pillar-desc">Share your learning wins, struggles, milestones, and breakthroughs every day. Progress compounds. Your consistency will inspire someone else to start. Think #BuildInPublic — raw, real, and relatable.</p>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">02</div>
+        <span class="pillar-icon">💡</span>
+        <div class="pillar-title">Tech Posts</div>
+        <p class="pillar-desc">Share insights, tutorials, tools, opinions, and threads that educate and spark discussion. From hot takes on frameworks to deep dives into system design — grow your reach and help the community learn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IS THIS FOR -->
+<section id="who" class="audience-section">
+  <div class="audience-inner">
+    <div class="section-label reveal">Built For You</div>
+    <h2 class="section-title reveal">Whoever you are,<br>you belong here.</h2>
+
+    <div class="audience-grid reveal">
+      <div class="audience-card">
+        <span class="audience-emoji">🌱</span>
+        <div class="audience-title">Beginners</div>
+        <p class="audience-desc">Just starting your coding journey. Small wins celebrated loudly. No gatekeeping, ever.</p>
+      </div>
+      <div class="audience-card">
+        <span class="audience-emoji">🚀</span>
+        <div class="audience-title">Indie Builders</div>
+        <p class="audience-desc">Shipping products solo. Accountability partners, build challenges, and a crew that gets it.</p>
+      </div>
+      <div class="audience-card">
+        <span class="audience-emoji">🎬</span>
+        <div class="audience-title">Tech Creators</div>
+        <p class="audience-desc">Growing your audience. Reposts, collabs, and a community that amplifies your work.</p>
+      </div>
+      <div class="audience-card">
+        <span class="audience-emoji">💻</span>
+        <div class="audience-title">Working Devs</div>
+        <p class="audience-desc">Already in the field. Lightweight participation, deep conversations, and peer learning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RITUALS -->
+<section id="rituals" class="rituals-section">
+  <div class="section-label reveal">Weekly Rituals</div>
+  <h2 class="section-title reveal">Show up. Every week has a pulse.</h2>
+
+  <div class="rituals-list reveal">
+    <div class="ritual-item">
+      <span class="ritual-day">Monday</span>
+      <div class="ritual-line"></div>
+      <div class="ritual-name">What Are You Building?</div>
+      <p class="ritual-desc">Set your intention for the week. Tell the community what you're shipping, learning, or exploring.</p>
+      <span class="ritual-tag">#DailyBuild</span>
+    </div>
+    <div class="ritual-item">
+      <span class="ritual-day">Wednesday</span>
+      <div class="ritual-line"></div>
+      <div class="ritual-name">Mid-Week Check-In</div>
+      <p class="ritual-desc">Progress update. Blockers? Wins? Share what's happened since Monday and get unstuck together.</p>
+      <span class="ritual-tag">#BuildTogether</span>
+    </div>
+    <div class="ritual-item">
+      <span class="ritual-day">Friday</span>
+      <div class="ritual-line"></div>
+      <div class="ritual-name">What Did You Ship?</div>
+      <p class="ritual-desc">End of week recap. Ship it or not — both count. Document your week and celebrate progress.</p>
+      <span class="ritual-tag">#DailyBuild</span>
+    </div>
+    <div class="ritual-item">
+      <span class="ritual-day">Any Day</span>
+      <div class="ritual-line"></div>
+      <div class="ritual-name">Tech Post Drop</div>
+      <p class="ritual-desc">Share a thread, insight, tutorial, or hot take. Grow together, teach what you know.</p>
+      <span class="ritual-tag">#TechWithUs</span>
+    </div>
+  </div>
+</section>
+
+<!-- HASHTAGS -->
+<div class="hashtags-section">
+  <div class="hashtags-inner">
+    <div class="hashtags-title">Community Hashtags — Use them. Find your people.</div>
+    <div class="hashtag-pills reveal">
+      <span class="hashtag-pill main">#BuildTogether</span>
+      <span class="hashtag-pill">#DailyBuild</span>
+      <span class="hashtag-pill">#TechWithUs</span>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-mono reveal">Ready to start?</div>
+    <h2 class="cta-title reveal">Don't just<br>scroll. Build.</h2>
+    <p class="cta-sub reveal">Your journey starts with one post. Share what you're learning, what you're building, or what you shipped today.</p>
+    <a href="https://x.com" class="cta-x-btn reveal" target="_blank">
+      <i class="x-icon">𝕏</i>
+      Join BuildTogether on X
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">Build<span>Together</span></a>
+  <p class="footer-text">Learn. Build. Ship. Together. · On X (Twitter)</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.left = mouseX + 'px';
+    cursor.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Hover effect on interactive elements
+  const interactives = document.querySelectorAll('a, button, .ritual-item, .pillar-card, .audience-card, .hashtag-pill');
+  interactives.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+      ring.style.width = '52px';
+      ring.style.height = '52px';
+      ring.style.borderColor = 'rgba(0,245,160,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'rgba(0,245,160,0.4)';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
